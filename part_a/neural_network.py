@@ -14,7 +14,6 @@ from matplotlib import pyplot as plt
 
 def load_data(base_path="../data"):
     """ Load the data in PyTorch Tensor.
-
     :return: (zero_train_matrix, train_data, valid_data, test_data)
         WHERE:
         zero_train_matrix: 2D sparse matrix where missing entries are
@@ -42,7 +41,6 @@ def load_data(base_path="../data"):
 class AutoEncoder(nn.Module):
     def __init__(self, num_question, k=100):
         """ Initialize a class AutoEncoder.
-
         :param num_question: int
         :param k: int
         """
@@ -54,7 +52,6 @@ class AutoEncoder(nn.Module):
 
     def get_weight_norm(self):
         """ Return ||W^1|| + ||W^2||.
-
         :return: float
         """
         g_w_norm = torch.norm(self.g.weight, 2)
@@ -63,7 +60,6 @@ class AutoEncoder(nn.Module):
 
     def forward(self, inputs):
         """ Return a forward pass given inputs.
-
         :param inputs: user vector.
         :return: user vector.
         """
@@ -85,7 +81,6 @@ class AutoEncoder(nn.Module):
 def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     """ Train the neural network, where the objective also includes
     a regularizer.
-
     :param model: Module
     :param lr: float
     :param lamb: float
@@ -95,8 +90,8 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     :param num_epoch: int
     :return: None
     """
-    # TODO: Add a regularizer to the cost function. 
-    
+    # TODO: Add a regularizer to the cost function.
+
     # Tell PyTorch you are training the model.
     model.train()
 
@@ -123,7 +118,7 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
             target[0][nan_mask] = output[0][nan_mask]
 
             loss = torch.sum((output - target) ** 2.)
-            
+
             # Regularized loss
             loss = loss + (0.5 * lamb * model.get_weight_norm())
 
@@ -140,10 +135,9 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
         print("Epoch: {} \tTraining Cost: {:.6f}\t "
               "Valid Acc: {}".format(epoch, train_loss, valid_acc))
 
-        with open("q3c_log", "a") as file:
-            file.write("Epoch: {} \tTraining Cost: {:.6f}\t "
-              "Valid Acc: {}\n".format(epoch, train_loss, valid_acc))
-
+        # with open("q3c_log", "a") as file:
+        #     file.write("Epoch: {} \tTraining Cost: {:.6f}\t "
+        #                "Valid Acc: {}\n".format(epoch, train_loss, valid_acc))
 
     # Plot training/validation data
     _, ax = plt.subplots(1, 2)
@@ -155,7 +149,6 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     ax[1].set_ylabel("Validation Accuracy")
     plt.show()
 
-
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -163,7 +156,6 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
 
 def evaluate(model, train_data, valid_data):
     """ Evaluate the valid_data on the current model.
-
     :param model: Module
     :param train_data: 2D FloatTensor
     :param valid_data: A dictionary {user_id: list,
@@ -196,26 +188,26 @@ def main():
     # validation set.                                                   #
     #####################################################################
     num_questions = train_matrix.shape[1]
-    
+
     # Set model hyperparameters.
     k = 10
-    model = AutoEncoder(num_questions, k) 
+    model = AutoEncoder(num_questions, k)
 
     # Set optimization hyperparameters.
     lr = 0.03
     num_epoch = 40
     lamb = 0.01
 
-    with open("q3c_log", "a") as file:
-        file.write("\n\n\nk: {} \tlr: {}\t "
-              "num_epoch: {}\t lambda: {}\n\n".format(k, lr, num_epoch, lamb))
+    # with open("q3c_log", "a") as file:
+    #     file.write("\n\n\nk: {} \tlr: {}\t "
+    #                "num_epoch: {}\t lambda: {}\n\n".format(k, lr, num_epoch, lamb))
 
     train(model, lr, lamb, train_matrix, zero_train_matrix,
           valid_data, num_epoch)
 
     test_acc = evaluate(model, zero_train_matrix, test_data)
     print("Test accuracy = %f" % (test_acc))
-    
+
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################

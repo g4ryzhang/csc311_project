@@ -1,18 +1,15 @@
-# TODO: complete this file.
-
 from neural_network import *
 from torch.utils.data import RandomSampler
 
 
 def load_data_rand_sample(base_path="../data"):
     """ Load the data in PyTorch Tensor. Training data is randomly sampled with
-        replacement. 
-
+        replacement.
     :return: (zero_train_matrix_rsample, train_data_rsample, valid_data, test_data)
         WHERE:
-        zero_train_matrix_rsample: 2D sparse matrix of randomly sampled training 
+        zero_train_matrix_rsample: 2D sparse matrix of randomly sampled training
         data where missing entries are filled with 0.
-        train_data_rsample: 2D sparse matrix of randomly sampled training data 
+        train_data_rsample: 2D sparse matrix of randomly sampled training data
         valid_data: A dictionary {user_id: list,
         user_id: list, is_correct: list}
         test_data: A dictionary {user_id: list,
@@ -36,7 +33,6 @@ def load_data_rand_sample(base_path="../data"):
 
 def ensemble_predict(model_lst, train_data, test_data):
     """ Average the predictions of all trained base models and evaluate.
-
     :param model_lst: list of Module
     :param train_data: 2D FloatTensor
     :param test_data: A dictionary {user_id: list,
@@ -61,9 +57,9 @@ def ensemble_predict(model_lst, train_data, test_data):
 
         for j in range(len(model_lst)):
             output = model_lst[j](inputs)
-            guesses[j] = output[0][test_data["question_id"][i]].item() >= 0.5   
-        
-        # Majority vote (Average the prediction)
+            guesses[j] = output[0][test_data["question_id"][i]].item() >= 0.5
+
+            # Majority vote (Average the prediction)
         pred = np.sum(guesses) >= 2.0
 
         if pred == test_data["is_correct"][i]:
@@ -76,7 +72,7 @@ def main():
     zero_train_matrix_rsample, train_matrix_rsample, valid_data, test_data = load_data()
 
     num_questions = train_matrix_rsample.shape[1]
-    
+
     # hyperparameters.
     k = 10
     lr = 0.03
@@ -87,15 +83,15 @@ def main():
     num_base_models = 3
 
     for i in range(num_base_models):
-        model = AutoEncoder(num_questions, k) 
+        model = AutoEncoder(num_questions, k)
 
         print("Training base model %d" % (i))
-        
+
         train(model, lr, lamb, train_matrix_rsample, zero_train_matrix_rsample,
-            valid_data, num_epoch)
+              valid_data, num_epoch)
 
         model_lst.append(model)
-        
+
     valid_acc = ensemble_predict(model_lst, zero_train_matrix_rsample, valid_data)
     test_acc = ensemble_predict(model_lst, zero_train_matrix_rsample, test_data)
     print("Final validation accuracy = %f" % (valid_acc))
